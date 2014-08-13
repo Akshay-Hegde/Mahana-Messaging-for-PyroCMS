@@ -17,7 +17,7 @@ Please note
 ------
 **Uninstalling this module will delete its tables and thus all messages!**
 
-Original credits
+Credits for Mahana
 ----------
 * Name:  Mahana Messaging Library for CodeIgniter
 *
