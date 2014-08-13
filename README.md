@@ -13,11 +13,11 @@ When installed and enabled, the library is magically autoloaded so you can start
 
 All available methods can be found in mahana/libraries/mahana.php. Documentation will follow.
 
-Please note:
+Please note
 ------
 **Uninstalling this module will delete its tables and thus all messages!**
 
-Original credits:
+Original credits
 ----------
 * Name:  Mahana Messaging Library for CodeIgniter
 *
