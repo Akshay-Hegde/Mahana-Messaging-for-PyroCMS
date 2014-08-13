@@ -12,10 +12,11 @@ class Events_Mahana {
     public function __construct() {
 
         $this->ci =& get_instance();
-        Events::register('public_controller', array($this, 'run'));
+        Events::register('public_controller', array($this, 'loadStuff'));
+        Events::register('admin_controller', array($this, 'loadStuff'));
     }
 
-    public function run() {
+    public function loadStuff() {
 
         $this->ci->load->config('mahana/mahana');
         $this->ci->load->model('mahana/mahana_model');

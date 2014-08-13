@@ -12,7 +12,7 @@
 *
 * Description: CI library for an internal messaging system. No views or controllers included.
 *
-*              DO CHECK the README.txt for setup instructions and notes!
+* Check the README.md for setup instructions and notes.
 *
 */
 
@@ -138,8 +138,48 @@ class Mahana
             {
                 if ( ! isset($threads[$msg['thread_id']]))
                 {
-                    $threads[$msg['thread_id']]['thread_id'] = $msg['thread_id'];
-                    $threads[$msg['thread_id']]['messages']  = array($msg);
+                    $threads[$msg['thread_id']]['thread_id'] 	= $msg['thread_id'];
+                    $threads[$msg['thread_id']]['subject'] 		= $msg['subject'];
+                    $threads[$msg['thread_id']]['messages'] 	= array($msg);
+                }
+                else
+                {
+                    $threads[$msg['thread_id']]['messages'][] = $msg;
+                }
+            }
+
+            return $this->_success($threads);
+        }
+
+        // General Error Occurred
+        return $this->_general_error();
+    }
+
+// ------------------------------------------------------------------------
+
+    /**
+     * get_all_threads_grouped() - will return all threads for user, including the status for specified user.
+     *                           - messages are grouped in threads.
+     *
+     * @param   integer  $user_id      REQUIRED
+     * @param   boolean  $full_thread  OPTIONAL - If true, user will also see messages from thread posted BEFORE user became participant
+     * @param   string   $order_by     OPTIONAL
+     * @return  array
+     */
+    public function get_all_threads_from_all_grouped($full_thread = FALSE, $order_by = 'ASC')
+    {
+
+        if ($message = $this->ci->mahana_model->get_all_threads_from_all($full_thread, $order_by))
+        {
+            $threads = array();
+
+            foreach ($message as $msg)
+            {
+                if ( ! isset($threads[$msg['thread_id']]))
+                {
+                    $threads[$msg['thread_id']]['thread_id'] 	= $msg['thread_id'];
+                    $threads[$msg['thread_id']]['subject'] 		= $msg['subject'];
+                    $threads[$msg['thread_id']]['messages'] 	= array($msg);
                 }
                 else
                 {

@@ -2,7 +2,7 @@
  
 class Module_Mahana extends Module {
  
-    public $version = '1.0';
+    public $version = '0.1';
  
     public function info()
     {
@@ -14,7 +14,8 @@ class Module_Mahana extends Module {
                 'en' => 'A module for implementing your own messaging system using Mahana.'
             ),
             'frontend' => true,
-            'backend'	=> false
+            'backend'	=> true,
+            'menu'	  	=> 'users',
         );
     }
     
@@ -62,10 +63,10 @@ class Module_Mahana extends Module {
     
     public function uninstall()
     {
-    	$this->dbforge->drop_table('default_mahana_messages');
-    	$this->dbforge->drop_table('default_mahana_participants');
-    	$this->dbforge->drop_table('default_mahana_status');
-    	$this->dbforge->drop_table('default_mahana_threads');
+    	$this->dbforge->drop_table('mahana_messages');
+    	$this->dbforge->drop_table('mahana_participants');
+    	$this->dbforge->drop_table('mahana_status');
+    	$this->dbforge->drop_table('mahana_threads');
     	return true;    
     }
  
