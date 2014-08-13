@@ -12,7 +12,7 @@ class Mahana_model extends CI_Model
      * @param   integer  $priority
      * @return  boolean
      */
-    function send_new_message($sender_id, $recipients, $subject, $body, $priority)
+    public function send_new_message($sender_id, $recipients, $subject, $body, $priority)
     {
         $this->db->trans_start();
 
@@ -21,19 +21,19 @@ class Mahana_model extends CI_Model
 
         // Create batch inserts
         $participants[] = array('thread_id' => $thread_id,'user_id' => $sender_id);
-        $statuses[]     = array('message_id' => $msg_id, 'user_id' => $sender_id,'status' => MSG_STATUS_READ);
+        $statuses[]     = array('message_id' => $msg_id, 'user_id' => $sender_id,'status' => $this->config->item('MSG_STATUS_READ'));
 
         if ( ! is_array($recipients))
         {
             $participants[] = array('thread_id' => $thread_id,'user_id' => $recipients);
-            $statuses[]     = array('message_id' => $msg_id, 'user_id' => $recipients, 'status' => MSG_STATUS_UNREAD);
+            $statuses[]     = array('message_id' => $msg_id, 'user_id' => $recipients, 'status' => $this->config->item('MSG_STATUS_UNREAD'));
         }
         else
         {
             foreach ($recipients as $recipient)
             {
                 $participants[] = array('thread_id' => $thread_id,'user_id' => $recipient);
-                $statuses[]     = array('message_id' => $msg_id, 'user_id' => $recipient, 'status' => MSG_STATUS_UNREAD);
+                $statuses[]     = array('message_id' => $msg_id, 'user_id' => $recipient, 'status' => $this->config->item('MSG_STATUS_UNREAD'));
             }
         }
 
@@ -62,7 +62,7 @@ class Mahana_model extends CI_Model
      * @param   integer  $priority
      * @return  boolean
      */
-    function reply_to_message($reply_msg_id, $sender_id, $body, $priority)
+    public function reply_to_message($reply_msg_id, $sender_id, $body, $priority)
     {
         $this->db->trans_start();
 
@@ -77,11 +77,11 @@ class Mahana_model extends CI_Model
 
         if ($recipients = $this->_get_thread_participants($thread_id, $sender_id))
         {
-            $statuses[] = array('message_id' => $msg_id, 'user_id' => $sender_id,'status' => MSG_STATUS_READ);
+            $statuses[] = array('message_id' => $msg_id, 'user_id' => $sender_id,'status' => $this->config->item('MSG_STATUS_READ'));
 
             foreach ($recipients as $recipient)
             {
-                $statuses[] = array('message_id' => $msg_id, 'user_id' => $recipient['user_id'], 'status' => MSG_STATUS_UNREAD);
+                $statuses[] = array('message_id' => $msg_id, 'user_id' => $recipient['user_id'], 'status' => $this->config->item('MSG_STATUS_UNREAD'));
             }
 
             $this->_insert_statuses($statuses);
@@ -107,13 +107,14 @@ class Mahana_model extends CI_Model
      * @param  integer $user_id
      * @return array
      */
-    function get_message($msg_id, $user_id)
+    public function get_message($msg_id, $user_id)
     {
-        $sql = 'SELECT m.*, s.status, t.subject, ' . USER_TABLE_USERNAME .
-        ' FROM ' . $this->db->dbprefix . 'msg_messages m ' .
-        ' JOIN ' . $this->db->dbprefix . 'msg_threads t ON (m.thread_id = t.id) ' .
-        ' JOIN ' . $this->db->dbprefix . USER_TABLE_TABLENAME . ' ON (' . USER_TABLE_ID . ' = m.sender_id) '.
-        ' JOIN ' . $this->db->dbprefix . 'msg_status s ON (s.message_id = m.id AND s.user_id = ? ) ' .
+        $sql = 'SELECT m.*, m.id as id, s.status, t.subject, u.*, p.*' .
+        ' FROM ' . $this->db->dbprefix . 'mahana_messages m ' .
+        ' JOIN ' . $this->db->dbprefix . 'mahana_threads t ON (m.thread_id = t.id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'users u' . ' ON (u.id = m.sender_id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'profiles pr' . ' ON (pr.user_id = m.sender_id) ' .        
+        ' JOIN ' . $this->db->dbprefix . 'mahana_status s ON (s.message_id = m.id AND s.user_id = ? ) ' .
         ' WHERE m.id = ? ' ;
 
         $query = $this->db->query($sql, array($user_id, $msg_id));
@@ -132,14 +133,15 @@ class Mahana_model extends CI_Model
      * @param   string   $order_by
      * @return  array
      */
-    function get_full_thread($thread_id, $user_id, $full_thread = FALSE, $order_by = 'asc')
+    public function get_full_thread($thread_id, $user_id, $full_thread = FALSE, $order_by = 'asc')
     {
-        $sql = 'SELECT m.*, s.status, t.subject, '.USER_TABLE_USERNAME .
-        ' FROM ' . $this->db->dbprefix . 'msg_participants p ' .
-        ' JOIN ' . $this->db->dbprefix . 'msg_threads t ON (t.id = p.thread_id) ' .
-        ' JOIN ' . $this->db->dbprefix . 'msg_messages m ON (m.thread_id = t.id) ' .
-        ' JOIN ' . $this->db->dbprefix . USER_TABLE_TABLENAME . ' ON (' . USER_TABLE_ID . ' = m.sender_id) '.
-        ' JOIN ' . $this->db->dbprefix . 'msg_status s ON (s.message_id = m.id AND s.user_id = ? ) ' .
+        $sql = 'SELECT m.*, m.id as id, s.status, t.subject, u.*, p.*' .
+        ' FROM ' . $this->db->dbprefix . 'mahana_participants p ' .
+        ' JOIN ' . $this->db->dbprefix . 'mahana_threads t ON (t.id = p.thread_id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'mahana_messages m ON (m.thread_id = t.id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'users u' . ' ON (u.id = m.sender_id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'profiles' . ' ON (profiles.user_id = m.sender_id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'mahana_status s ON (s.message_id = m.id AND s.user_id = ? ) ' .
         ' WHERE p.user_id = ? ' .
         ' AND p.thread_id = ? ';
 
@@ -165,14 +167,15 @@ class Mahana_model extends CI_Model
      * @param   string   $order_by
      * @return  array
      */
-    function get_all_threads($user_id, $full_thread = FALSE, $order_by = 'asc')
+    public function get_all_threads($user_id, $full_thread = FALSE, $order_by = 'asc')
     {
-        $sql = 'SELECT m.*, s.status, t.subject, '.USER_TABLE_USERNAME .
-        ' FROM ' . $this->db->dbprefix . 'msg_participants p ' .
-        ' JOIN ' . $this->db->dbprefix . 'msg_threads t ON (t.id = p.thread_id) ' .
-        ' JOIN ' . $this->db->dbprefix . 'msg_messages m ON (m.thread_id = t.id) ' .
-        ' JOIN ' . $this->db->dbprefix . USER_TABLE_TABLENAME . ' ON (' . USER_TABLE_ID . ' = m.sender_id) '.
-        ' JOIN ' . $this->db->dbprefix . 'msg_status s ON (s.message_id = m.id AND s.user_id = ? ) ' .
+        $sql = 'SELECT m.*, s.status, t.subject, u.*, p.*' .
+        ' FROM ' . $this->db->dbprefix . 'mahana_participants p ' .
+        ' JOIN ' . $this->db->dbprefix . 'mahana_threads t ON (t.id = p.thread_id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'mahana_messages m ON (m.thread_id = t.id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'users u' . ' ON (u.id = m.sender_id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'profiles pr' . ' ON (pr.user_id = m.sender_id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'mahana_status s ON (s.message_id = m.id AND s.user_id = ? ) ' .
         ' WHERE p.user_id = ? ' ;
 
         if (!$full_thread)
@@ -197,10 +200,10 @@ class Mahana_model extends CI_Model
      * @param   integer  $status_id
      * @return  integer
      */
-    function update_message_status($msg_id, $user_id, $status_id)
+    public function update_message_status($msg_id, $user_id, $status_id)
     {
         $this->db->where(array('message_id' => $msg_id, 'user_id' => $user_id ));
-        $this->db->update('msg_status', array('status' => $status_id ));
+        $this->db->update('mahana_status', array('status' => $status_id ));
 
         return $this->db->affected_rows();
     }
@@ -214,7 +217,7 @@ class Mahana_model extends CI_Model
      * @param   integer  $user_id
      * @return  boolean
      */
-    function add_participant($thread_id, $user_id)
+    public function add_participant($thread_id, $user_id)
     {
         $this->db->trans_start();
 
@@ -227,7 +230,7 @@ class Mahana_model extends CI_Model
 
         foreach ($messages as $message)
         {
-            $statuses[] = array('message_id' => $message['id'], 'user_id' => $user_id, 'status' => MSG_STATUS_UNREAD);
+            $statuses[] = array('message_id' => $message['id'], 'user_id' => $user_id, 'status' => $this->config->item('MSG_STATUS_UNREAD'));
         }
 
         $this->_insert_statuses($statuses);
@@ -252,7 +255,7 @@ class Mahana_model extends CI_Model
      * @param   integer  $user_id
      * @return  boolean
      */
-    function remove_participant($thread_id, $user_id)
+    public function remove_participant($thread_id, $user_id)
     {
         $this->db->trans_start();
 
@@ -280,10 +283,10 @@ class Mahana_model extends CI_Model
      * @param   integer $user_id
      * @return  boolean
      */
-    function valid_new_participant($thread_id, $user_id)
+    public function valid_new_participant($thread_id, $user_id)
     {
         $sql = 'SELECT COUNT(*) AS count ' .
-        ' FROM ' . $this->db->dbprefix . 'msg_participants p ' .
+        ' FROM ' . $this->db->dbprefix . 'mahana_participants p ' .
         ' WHERE p.thread_id = ? ' .
         ' AND p.user_id = ? ';
 
@@ -305,11 +308,11 @@ class Mahana_model extends CI_Model
      * @param   integer  $user_id`
      * @return  boolean
      */
-    function application_user($user_id)
+    public function application_user($user_id)
     {
         $sql = 'SELECT COUNT(*) AS count ' .
-        ' FROM ' . $this->db->dbprefix . USER_TABLE_TABLENAME .
-        ' WHERE ' . USER_TABLE_ID . ' = ?' ;
+        ' FROM ' . $this->db->dbprefix . 'users' .
+        ' WHERE users.id = ?' ;
 
         $query = $this->db->query($sql, array($user_id));
 
@@ -330,7 +333,7 @@ class Mahana_model extends CI_Model
      * @param   integer  $sender_id
      * @return  mixed
      */
-    function get_participant_list($thread_id, $sender_id = 0)
+    public function get_participant_list($thread_id, $sender_id = 0)
     {
         if ($results = $this->_get_thread_participants($thread_id, $sender_id))
         {
@@ -348,9 +351,12 @@ class Mahana_model extends CI_Model
      * @param   integer  $status_id
      * @return  integer
      */
-    function get_msg_count($user_id, $status_id = MSG_STATUS_UNREAD)
+    public function get_msg_count($user_id, $status_id = false)
     {
-        $query = $this->db->select('COUNT(*) AS msg_count')->where(array('user_id' => $user_id, 'status' => $status_id ))->get('msg_status');
+    
+    	$status_id = $status_id ? $status_id : $this->config->item('MSG_STATUS_UNREAD');
+    	
+        $query = $this->db->select('COUNT(*) AS msg_count')->where(array('user_id' => $user_id, 'status' => $status_id ))->get('mahana_status');
 
         return $query->row()->msg_count;
     }
@@ -367,7 +373,7 @@ class Mahana_model extends CI_Model
      */
     private function _insert_thread($subject)
     {
-        $insert_id = $this->db->insert('msg_threads', array('subject' => $subject));
+        $insert_id = $this->db->insert('mahana_threads', array('subject' => $subject));
 
         return $this->db->insert_id();
     }
@@ -388,7 +394,7 @@ class Mahana_model extends CI_Model
         $insert['body']      = $body;
         $insert['priority']  = $priority;
 
-        $insert_id = $this->db->insert('msg_messages', $insert);
+        $insert_id = $this->db->insert('mahana_messages', $insert);
 
         return $this->db->insert_id();
     }
@@ -401,7 +407,7 @@ class Mahana_model extends CI_Model
      */
     private function _insert_participants($participants)
     {
-        return $this->db->insert_batch('msg_participants', $participants);
+        return $this->db->insert_batch('mahana_participants', $participants);
     }
 
     /**
@@ -412,7 +418,7 @@ class Mahana_model extends CI_Model
      */
     private function _insert_statuses($statuses)
     {
-        return $this->db->insert_batch('msg_status', $statuses);
+        return $this->db->insert_batch('mahana_status', $statuses);
     }
 
     /**
@@ -423,7 +429,7 @@ class Mahana_model extends CI_Model
      */
     private function _get_thread_id_from_message($msg_id)
     {
-        $query = $this->db->select('thread_id')->get_where('msg_messages', array('id' => $msg_id));
+        $query = $this->db->select('thread_id')->get_where('mahana_messages', array('id' => $msg_id));
 
         if ($query->num_rows())
         {
@@ -440,7 +446,7 @@ class Mahana_model extends CI_Model
      */
     private function _get_messages_by_thread_id($thread_id)
     {
-        $query = $this->db->get_where('msg_messages', array('thread_id' => $thread_id));
+        $query = $this->db->get_where('mahana_messages', array('thread_id' => $thread_id));
 
         return $query->result_array();
     }
@@ -459,13 +465,14 @@ class Mahana_model extends CI_Model
 
         if ($sender_id) // If $sender_id 0, no one to exclude
         {
-            $array['msg_participants.user_id != '] = $sender_id;
+            $array['mahana_participants.user_id != '] = $sender_id;
         }
 
-        $this->db->select('msg_participants.user_id, '.USER_TABLE_USERNAME, FALSE);
-        $this->db->join(USER_TABLE_TABLENAME, 'msg_participants.user_id = ' . USER_TABLE_ID);
+        $this->db->select('mahana_participants.user_id, users.*, profiles.*', FALSE);
+        $this->db->join('users', 'mahana_participants.user_id = users.id');
+        $this->db->join('profiles', 'mahana_participants.user_id = profiles.user_id');        
 
-        $query = $this->db->get_where('msg_participants', $array);
+        $query = $this->db->get_where('mahana_participants', $array);
 
         return $query->result_array();
     }
@@ -479,7 +486,7 @@ class Mahana_model extends CI_Model
      */
     private function _delete_participant($thread_id, $user_id)
     {
-        $this->db->delete('msg_participants', array('thread_id' => $thread_id, 'user_id' => $user_id));
+        $this->db->delete('mahana_participants', array('thread_id' => $thread_id, 'user_id' => $user_id));
 
         if ($this->db->affected_rows() > 0)
         {
@@ -498,7 +505,7 @@ class Mahana_model extends CI_Model
     private function _delete_statuses($thread_id, $user_id)
     {
         $sql = 'DELETE s FROM msg_status s ' .
-        ' JOIN ' . $this->db->dbprefix . 'msg_messages m ON (m.id = s.message_id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'mahana_messages m ON (m.id = s.message_id) ' .
         ' WHERE m.thread_id = ? ' .
         ' AND s.user_id = ? ';
 

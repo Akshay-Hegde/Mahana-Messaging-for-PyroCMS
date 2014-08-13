@@ -16,20 +16,12 @@
 *
 */
 
-class Mahana_messaging
+class Mahana
 {
     public function __construct()
     {
         $this->ci =& get_instance();
-        // ------------------------------------------------------------------------
-        // @TODO: There must be a better way than this to specify a file
-        // path that works in both standard CodeIgniter and HMVC modules.
-        // ------------------------------------------------------------------------
-        require_once dirname(__FILE__).'/../config/mahana.php';
-
-        $this->ci->load->model('mahana_model');
-        $this->ci->load->helper('language');
-        $this->ci->lang->load('mahana');
+        
     }
 
     // ------------------------------------------------------------------------
@@ -41,16 +33,16 @@ class Mahana_messaging
      * @param   integer  $user_id  REQUIRED
      * @return  array
      */
-    function get_message($msg_id, $user_id)
+    public function get_message($msg_id, $user_id)
     {
         if (empty($msg_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_MSG_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_msg_id'));
         }
 
         if (empty($user_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_USER_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_user_id'));
         }
 
         if ($message = $this->ci->mahana_model->get_message($msg_id, $user_id))
@@ -73,16 +65,16 @@ class Mahana_messaging
      * @param   string   $order_by     OPTIONAL
      * @return  array
      */
-    function get_full_thread($thread_id, $user_id, $full_thread = FALSE, $order_by = 'ASC')
+    public function get_full_thread($thread_id, $user_id, $full_thread = FALSE, $order_by = 'ASC')
     {
         if (empty($thread_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_THREAD_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_thread_id'));
         }
 
         if (empty($user_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_USER_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_user_id'));
         }
 
         if ($message = $this->ci->mahana_model->get_full_thread($thread_id, $user_id, $full_thread, $order_by))
@@ -104,11 +96,11 @@ class Mahana_messaging
      * @param   string   $order_by     OPTIONAL
      * @return  array
      */
-    function get_all_threads($user_id, $full_thread = FALSE, $order_by = 'ASC')
+    public function get_all_threads($user_id, $full_thread = FALSE, $order_by = 'ASC')
     {
         if (empty($user_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_USER_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_user_id'));
         }
 
         if ($message = $this->ci->mahana_model->get_all_threads($user_id, $full_thread, $order_by))
@@ -131,11 +123,11 @@ class Mahana_messaging
      * @param   string   $order_by     OPTIONAL
      * @return  array
      */
-    function get_all_threads_grouped($user_id, $full_thread = FALSE, $order_by = 'ASC')
+    public function get_all_threads_grouped($user_id, $full_thread = FALSE, $order_by = 'ASC')
     {
         if (empty($user_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_USER_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_user_id'));
         }
 
         if ($message = $this->ci->mahana_model->get_all_threads($user_id, $full_thread, $order_by))
@@ -172,26 +164,26 @@ class Mahana_messaging
      * @param   integer  $status_id  REQUIRED - should come from config/mahana.php list of constants
      * @return  array
      */
-    function update_message_status($msg_id, $user_id, $status_id )
+    public function update_message_status($msg_id, $user_id, $status_id )
     {
         if (empty($msg_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_MSG_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_msg_id'));
         }
 
         if (empty($user_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_USER_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_user_id'));
         }
 
         if (empty($status_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_STATUS_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_status_id'));
         }
 
         if ($this->ci->mahana_model->update_message_status($msg_id, $user_id, $status_id))
         {
-            return $this->_success(NULL, MSG_STATUS_UPDATE);
+            return $this->_success(NULL, $this->ci->config->item('msg_status_update'));
         }
 
         // General Error Occurred
@@ -208,31 +200,31 @@ class Mahana_messaging
      * @param   integer  $user_id    REQUIRED
      * @return  array
      */
-    function add_participant($thread_id, $user_id)
+    public function add_participant($thread_id, $user_id)
     {
         if (empty($thread_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_THREAD_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_thread_id'));
         }
 
         if (empty($user_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_USER_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_user_id'));
         }
 
         if ( ! $this->ci->mahana_model->valid_new_participant($thread_id, $user_id))
         {
-            $this->_particpant_error(MSG_ERR_PARTICIPANT_EXISTS);
+            $this->_particpant_error($this->ci->config->item('msg_err_participant_exists'));
         }
 
         if ( ! $this->ci->mahana_model->application_user($user_id))
         {
-            $this->_particpant_error(MSG_ERR_PARTICIPANT_NONSYSTEM);
+            $this->_particpant_error($this->ci->config->item('msg_err_participant_nonsystem'));
         }
 
         if ($this->ci->mahana_model->add_participant($thread_id, $user_id ))
         {
-            return $this->_success(NULL, MSG_PARTICIPANT_ADDED);
+            return $this->_success(NULL, $this->ci->config->item('msg_participant_added'));
         }
 
         // General Error Occurred
@@ -248,21 +240,21 @@ class Mahana_messaging
      * @param   integer  $user_id    REQUIRED
      * @return  array
      */
-    function remove_participant($thread_id, $user_id)
+    public function remove_participant($thread_id, $user_id)
     {
         if (empty($thread_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_THREAD_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_thread_id'));
         }
 
         if (empty($user_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_USER_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_user_id'));
         }
 
         if ($this->ci->mahana_model->remove_participant($thread_id, $user_id))
         {
-            return $this->_success(NULL, MSG_PARTICIPANT_REMOVED);
+            return $this->_success(NULL, $this->ci->config->item('msg_participant_removed'));
         }
 
         // General Error Occurred
@@ -281,19 +273,22 @@ class Mahana_messaging
      * @param   integer  $priority
      * @return  array
      */
-    function send_new_message($sender_id, $recipients, $subject = '', $body = '', $priority = PRIORITY_NORMAL)
+    public function send_new_message($sender_id, $recipients, $subject = '', $body = '', $priority = false)
     {
+    
+    	$priority = $priority ? $priority : $this->ci->config->item('priority_normal');
+    
         if (empty($sender_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_SENDER_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_sender_id'));
         }
 
         if (empty($recipients))
         {
             return array(
                 'err'  => 1,
-                'code' => MSG_ERR_INVALID_RECIPIENTS,
-                'msg'  => lang('mahana_'.MSG_ERR_INVALID_RECIPIENTS)
+                'code' => $this->ci->config->item('msg_err_invalid_recipients'),
+                'msg'  => lang('mahana:msg_err_invalid_recipients')
             );
         }
 
@@ -318,21 +313,24 @@ class Mahana_messaging
      * @param   integer  $priority
      * @return  array
      */
-    function reply_to_message($msg_id, $sender_id, $subject = '', $body = '', $priority = PRIORITY_NORMAL)
+    public function reply_to_message($msg_id, $sender_id, $subject = '', $body = '', $priority = false)
     {
+    
+    	$priority = $priority ? $priority : $this->ci->config->item('priority_normal');
+    	 
         if (empty($sender_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_SENDER_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_sender_id'));
         }
 
         if (empty($msg_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_MSG_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_sender_id'));
         }
 
         if ($this->ci->mahana_model->reply_to_message($msg_id, $sender_id, $body, $priority))
         {
-            return $this->_success(NULL, MSG_MESSAGE_SENT);
+            return $this->_success(NULL, $this->ci->config->item('msg_message_sent'));
         }
 
         // General Error Occurred
@@ -348,11 +346,11 @@ class Mahana_messaging
      * @param   integer  $sender_id  REQUIRED
      * @return  array
      */
-    function get_participant_list($thread_id, $sender_id = 0)
+    public function get_participant_list($thread_id, $sender_id = 0)
     {
         if (empty($thread_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_THREAD_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_thread_id'));
         }
 
         if ($participants = $this->ci->mahana_model-> get_participant_list($thread_id, $sender_id))
@@ -373,11 +371,14 @@ class Mahana_messaging
      * @param   integer  $status_id  OPTIONAL - defaults to "Unread"
      * @return  array
      */
-    function get_msg_count($user_id, $status_id = MSG_STATUS_UNREAD)
+    public function get_msg_count($user_id, $status_id = false)
     {
+    
+    	$status_id = $status_id ? $status_id : $this->ci->config->item('msg_status_unread');
+    
         if (empty($user_id))
         {
-            return $this->_invalid_id(MSG_ERR_INVALID_USER_ID);
+            return $this->_invalid_id($this->ci->config->item('msg_err_invalid_user_id'));
         }
 
         if ($message = $this->ci->mahana_model->get_msg_count($user_id, $status_id))
@@ -399,11 +400,13 @@ class Mahana_messaging
      * @param   mixed  $retval
      * @return  array
      */
-    private function _success($retval = '', $message = MSG_SUCCESS)
+    private function _success($retval = '', $message = false)
     {
+    
+    	$message = $message ? $message : $this->ci->config->item('msg_success');
         return array(
             'err'    => 0,
-            'code'   => MSG_SUCCESS,
+            'code'   => $this->ci->config->item('msg_success'),
             'msg'    => lang('mahana_' . $message),
             'retval' => $retval
         );
@@ -454,8 +457,8 @@ class Mahana_messaging
     {
         return array(
             'err'  => 1,
-            'code' => MSG_ERR_GENERAL,
-            'msg'  => lang('mahana_'.MSG_ERR_GENERAL)
+            'code' => $this->ci->config->item('msg_err_general'),
+            'msg'  => lang('mahana:msg_err_general')
         );
     }
 }
