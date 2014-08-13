@@ -8,7 +8,7 @@
 *
 * Adapted for PyroCMS by Ben Rogmans
 *
-* Location:    will be on github shortly
+* Location:    https://github.com/benrogmans/Mahana-Messaging-for-PyroCMS
 *
 * Description: CI library for an internal messaging system. No views or controllers included.
 *
