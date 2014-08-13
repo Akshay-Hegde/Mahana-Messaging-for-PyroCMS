@@ -6,11 +6,11 @@
 *              jrmadsen67@gmail.com
 *              http://www.codebyjeff.com
 *
+* Adapted for PyroCMS by Ben Rogmans
+*
 * Location:    will be on github shortly
 *
-* Description: CI library for linking to application's existing user table and
-*              creating basis of an internal messaging system. No views or controllers
-*              included.
+* Description: CI library for an internal messaging system. No views or controllers included.
 *
 *              DO CHECK the README.txt for setup instructions and notes!
 *
@@ -29,7 +29,7 @@ class Mahana
     /**
      * get_message() - will return a single message, including the status for specified user.
      *
-     * @param   integer  $msg_id   EQUIRED
+     * @param   integer  $msg_id   REQUIRED
      * @param   integer  $user_id  REQUIRED
      * @return  array
      */
