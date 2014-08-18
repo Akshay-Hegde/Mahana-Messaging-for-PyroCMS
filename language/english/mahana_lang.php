@@ -15,3 +15,10 @@ $lang['mahana:msg_participant_added'] 	  	    = 'Participant added';
 $lang['mahana:msg_err_participant_exists'] 	 	= 'User is already participating in this thread';
 $lang['mahana:msg_err_participant_nonsystem'] 	= 'This user id is not in the system';
 $lang['mahana:msg_participant_removed'] 	    = 'Participant removed from thread';
+
+$lang['mahana:no_threads'] 	    				= 'No threads were found';
+
+$lang['mahana:all_threads'] 	    			= 'All threads';
+$lang['mahana:thread'] 	    					= 'Thread';
+$lang['mahana:participants'] 	    			= 'Participants';
+$lang['mahana:subject'] 	    				= 'Subject';

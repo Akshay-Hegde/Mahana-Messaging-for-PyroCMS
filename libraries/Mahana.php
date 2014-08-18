@@ -179,6 +179,7 @@ class Mahana
                 {
                     $threads[$msg['thread_id']]['thread_id'] 	= $msg['thread_id'];
                     $threads[$msg['thread_id']]['subject'] 		= $msg['subject'];
+                    $threads[$msg['thread_id']]['participants']	= $this->get_participant_list($msg['thread_id']);
                     $threads[$msg['thread_id']]['messages'] 	= array($msg);
                 }
                 else

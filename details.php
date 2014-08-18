@@ -57,7 +57,22 @@ class Module_Mahana extends Module {
 		$this->db->query($participants);
 		$this->db->query($status);
 		$this->db->query($threads);
-			
+		
+		$fb_settings = [
+			'slug' => 'mahana_subject_as_stream',
+			'title' => 'Stream connected to subject',
+			'description' => 'You can treat subjects of threads as IDs of a stream',
+			'`default`' => '0',
+			'`value`' => '0',
+			'type' => 'select',
+			'`options`' => 'func:mahana/mahana/get_streams',
+			'is_required' => 0,
+			'is_gui' => 1,
+			'module' => 'mahana'
+		];
+		
+		$this->db->insert('settings', $fb_settings);
+		
 		return true;
     }
     
@@ -67,6 +82,9 @@ class Module_Mahana extends Module {
     	$this->dbforge->drop_table('mahana_participants');
     	$this->dbforge->drop_table('mahana_status');
     	$this->dbforge->drop_table('mahana_threads');
+    	
+    	$this->db->delete('settings', ['slug'=>'subject_as_stream']);
+    	
     	return true;    
     }
  

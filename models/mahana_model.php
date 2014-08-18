@@ -135,12 +135,12 @@ class Mahana_model extends CI_Model
      */
     public function get_full_thread($thread_id, $user_id, $full_thread = FALSE, $order_by = 'asc')
     {
-        $sql = 'SELECT m.*, m.id as message_id, s.status, t.subject, u.*, p.*' .
+        $sql = 'SELECT m.*, m.id as message_id, s.status, t.subject, u.*, p.*, pr.*' .
         ' FROM ' . $this->db->dbprefix . 'mahana_participants p ' .
         ' JOIN ' . $this->db->dbprefix . 'mahana_threads t ON (t.id = p.thread_id) ' .
         ' JOIN ' . $this->db->dbprefix . 'mahana_messages m ON (m.thread_id = t.id) ' .
         ' JOIN ' . $this->db->dbprefix . 'users u' . ' ON (u.id = m.sender_id) ' .
-        ' JOIN ' . $this->db->dbprefix . 'profiles' . ' ON (profiles.user_id = m.sender_id) ' .
+        ' JOIN ' . $this->db->dbprefix . 'profiles pr' . ' ON (pr.user_id = m.sender_id) ' .
         ' JOIN ' . $this->db->dbprefix . 'mahana_status s ON (s.message_id = m.id AND s.user_id = ? ) ' .
         ' WHERE p.user_id = ? ' .
         ' AND p.thread_id = ? ';
