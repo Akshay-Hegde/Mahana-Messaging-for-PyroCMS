@@ -2,20 +2,20 @@
  
 class Module_Mahana extends Module {
  
-    public $version = '0.1';
+    public $version = '0.2';
  
     public function info()
     {
         return array(
             'name' => array(
-                'en' => 'Mahana messaging'
+                'en' => 'Messages'
             ),
             'description' => array(
-                'en' => 'A module for implementing your own messaging system using Mahana.'
+                'en' => 'Mahana Messaging module. Implement your own messaging system using Mahana.'
             ),
             'frontend' => true,
             'backend'	=> true,
-            'menu'	  	=> 'users',
+            'menu'	  	=> 'content',
         );
     }
     
